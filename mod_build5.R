@@ -42,9 +42,10 @@ mod =  function(t, state_mod_lymph, parameters_mod_lymph) {
       #' The kidney line is slightly different than the paper, but I think there was possibly 
       #' a typo in the original paper? they report L_ev_kidney/R_kidney instead of 
       #' C_ev_kidney/R_kidney for some reason...
-      #' On 2.13.2020 I'm making a 3rd revision where 
-      #' F_tissue x L_tissue x (C_ev_tissue + C_v_tissue) + is reverted back to
-      #' F_tissue x L_tissue x (C_ev_tissue + C_v_tissue)
+      #' On 2.13.2020 I'm making a 3rd revision where the general structure
+      #' F_tissue x L_tissue x (C_ev_tissue + C_v_tissue) + is changed to
+      #' F_tissue x L_tissue x C_ev_tissue
+      #' That seems to better reflect the khot et al. manuscript
       dC_lymph_node =
         (F_lungs     *L_lungs     *C_ev_lungs    +
            F_heart     *L_heart     *C_ev_heart    +

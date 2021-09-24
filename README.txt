@@ -20,10 +20,11 @@ The paper lacked enough documentation and detail to be able to actually fully re
 the manuscript. So, I thought it would be much more useful to reproduce the model myself and make the code 
 freely available! That way, others could use my code as a basis to innovate on these scientist's contribution 
 to the modeling community. I have tried reaching out to the authors to get clarification, but I was never able
-to get in touch.
+to get in touch. Most of the problems with the model as detailed in the original compartment are related to
+lymph fluid dynamics.
 
-To get started, simply open the newest build of the model – mod_build5.R – and run the script! The ode solver 
-used to simulated the model is deSolve. The call is at the bottom of the script The paper that the model is 
+To get started, simply open the newest build of the model - mod_build5.R - and run the script! The ode solver 
+used to simulated the model is deSolve. The call is at the bottom of the script. The paper that the model is 
 built from is also included in the primary directory. A second paper frequently referenced by the authors for 
 parameter values is Physiologically Based Pharmacokinetic Model for Specific and Nonspecific Monoclonal 
 Antibodies and Fragments in Normal Tissues and Human Tumor Xenografts in Nude Mice by Laurence T. Baxter, et 
