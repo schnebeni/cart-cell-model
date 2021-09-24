@@ -20,7 +20,7 @@ The paper lacked enough documentation and detail to be able to actually fully re
 the manuscript. So, I thought it would be much more useful to reproduce the model myself and make the code 
 freely available! That way, others could use my code as a basis to innovate on these scientist's contribution 
 to the modeling community. I have tried reaching out to the authors to get clarification, but I was never able
-to get in touch. Most of the problems with the model as detailed in the original compartment are related to
+to get in touch. Most of the problems with the model as detailed in the original manuscript are related to
 lymph fluid dynamics.
 
 To get started, simply open the newest build of the model - mod_build5.R - and run the script! The ode solver 
@@ -39,8 +39,8 @@ and Rakesh K. Jain. Cancer Res March 15 1994 (54) (6) 1517-1528
 
 The parameters are in the R script parameters.R. Following the paper exactly, I wasn't able to make a stable
 model, so there are two parameterizations. The first "parameters" is simply the parameters as reported in the
-original manuscript. The second is a modification I made on the reported parameters that actually works 
-produces a stable model. Since the modification is on the lymph compartment, I called it 
+original manuscript. The second is a modification I made on the reported parameters that actually produces 
+a stable set of simulations. Since the modifications are in the lymph compartment parameters, I called it 
 "parameters_mod_lymph." ini.R contains the dataframes used to initialize the simulation and the initial 
 administration event. The example plot is for your reference, to make sure the simulation engine is working 
-correctly.
+as expected.
