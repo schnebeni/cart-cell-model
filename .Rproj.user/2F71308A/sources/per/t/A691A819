@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1581634932932.000,
+    "dirty" : true,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3987395163",
+    "id" : "A691A819",
+    "lastKnownWriteTime" : 1581636518,
+    "last_content_update" : 1581637495404,
+    "path" : "//VBOXSVR/Dropbox/BMS/20_Q1/cartCellTherapy - test/mod_build3.R",
+    "project_path" : "mod_build3.R",
+    "properties" : {
+        "cursorPosition" : "66,0",
+        "scrollLine" : "42"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

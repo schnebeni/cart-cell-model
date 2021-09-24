@@ -1,0 +1,347 @@
+#' Author: Benjamin K Schneider
+#' Date: 12.19.2019.... First Major update on 02.07.2020
+#' Notes =========================================================
+#' 
+#' General form for the vascular tissu.e =========================
+# dC_v_TISSU.E =
+#   (Q_TISSU.E*C_v_lungs - (Q_TISSU.E - L_TISSU.E)*C_v_TISSU.E)*V_v_TISSU.E -
+#   J_TISSU.E*C_v_TISSU.E
+
+#' General form for the vascular tissu.e 02.07.2020 update =======
+# #' Typical tissue
+# dC_v_TISSU.E =
+#   (Q_TISSU.E*C_v_lungs - (Q_TISSU.E - L_TISSU.E)*C_v_TISSU.E -
+#      J_TISSU.E*C_v_TISSU.E*V_v_TISSU.E)/V_v_TISSU.E
+
+#' General form for the vascular tissu.e with retention 02.07.2020 update
+# dC_v_TISSU.E =
+#   (Q_TISSU.E*C_v_lungs - (Q_TISSU.E - L_TISSU.E)*C_v_TISSU.E -
+#      J_TISSU.E*C_v_TISSU.E*V_v_TISSU.E)/V_v_TISSU.E
+
+#' General form for the Evascular tissu.e ========================
+# dC_ev_TISSU.E =
+#   (J_TISSU.E*C_v_TISSU.E*V_v_TISSU.E - L_TISSU.E*C_ev_TISSU.E*F_TISSU.E)/V_ev_TISSU.E
+#'
+#' General form for the Evascular tissu.e with retention =========
+# dC_ev_TISSU.E =
+#   (J_TISSU.E*C_v_TISSU.E*V_v_TISSU.E - L_TISSU.E*(C_ev_TISSU.E/R_TISSU.E)*F_TISSU.E)/V_ev_TISSU.E
+
+source("ini.R")
+source("parameters.R")
+library(deSolve)
+times = seq(0, 30, by = .1)
+
+mod =  function(t, state_mod_lymph, parameters_mod_lymph) {
+  with(as.list(c(state_mod_lymph, parameters_mod_lymph)), {
+
+
+    # C_lymph_node ========================================================
+    { #' Unique compartment dynamics. These were modified on 02/11/2020 to reflect that there 
+      #' is lymph flow from vascular and ev sources. But, this differs from the paper 
+      #' where only extravascular volume lymph flow is considered.
+      #' The kidney line is slightly different than the paper, but I think there was possibly 
+      #' a typo in the original paper? they report L_ev_kidney/R_kidney instead of 
+      #' C_ev_kidney/R_kidney for some reason...
+      #' On 2.13.2020 I'm making a 3rd revision where 
+      #' F_tissue x L_tissue x (C_ev_tissue + C_v_tissue) + is reverted back to
+      #' F_tissue x L_tissue x (C_ev_tissue + C_v_tissue)
+      dC_lymph_node =
+        (F_lungs     *L_lungs     *C_ev_lungs    +
+           F_heart     *L_heart     *C_ev_heart    +
+           F_brain     *L_brain     *C_ev_brain    +
+           F_skin      *L_skin      *C_ev_skin     +
+           F_adipose   *L_adipose   *C_ev_adipose  +
+           F_si        *L_si        *C_ev_si       +
+           F_li        *L_li        *C_ev_li       +
+           F_pancreas  *L_pancreas  *C_ev_pancreas +
+           F_others    *L_others    *C_ev_others   +
+           
+           F_kidney    *L_kidney    *((C_ev_kidney)/R_kidney) +
+           F_spleen    *L_spleen    *((C_ev_spleen)/R_spleen) +
+           F_liver     *L_liver     *((C_ev_liver)/R_liver)   +
+           
+           L_TDLN      *C_TDLN        +
+           L_IGLN      *C_IGLN        -
+           L_lymph_node*C_lymph_node) /V_lymph_node}
+
+
+    # C_whole_blood ========================================================
+    { #' Unique comparment dynamics
+    dC_whole_blood =
+  (-1*(Q_lungs     +L_lungs)     *C_whole_blood +
+      (Q_heart     -L_heart)     *C_v_heart     +
+      (Q_kidney    -L_kidney)    *C_v_kidney    +
+      (Q_brain     -L_brain)     *C_v_brain     + 
+      (Q_muscle    -L_muscle)    *C_v_muscle    +
+      (Q_bone      -L_bone)      *C_v_bone      +      
+      (Q_skin      -L_skin)      *C_v_skin      +      
+      (Q_adipose   -L_adipose)   *C_v_adipose   +
+      (Q_others    -L_others)    *C_v_others    +
+
+     ((Q_si        -L_si)        +
+      (Q_li        -L_li)        +
+      (Q_spleen    -L_spleen)    +
+      (Q_pancreas  -L_pancreas)  +
+      (Q_liver     -L_liver))    *C_v_liver     +  
+       0) }#/V_whole_blood}
+
+
+    # C_v_tumor ========================================================
+      #' Typical tissue
+    dC_v_tumor =
+      (Q_tumor*C_v_lungs - (Q_tumor - L_tumor)*C_v_tumor -
+         J_tumor*C_v_tumor*V_v_tumor)#/V_v_tumor
+
+
+    # C_v_liver ========================================================
+      #' Unique compartment
+    dC_v_liver =
+     (Q_liver*C_v_lungs +
+      
+      (Q_si       - L_si)      *C_v_si       +
+      (Q_li       - L_li)      *C_v_li       +
+      (Q_spleen   - L_spleen)  *C_v_spleen   +
+      (Q_pancreas - L_pancreas)*C_v_pancreas -
+        
+     ((Q_si - L_si) + (Q_li - Q_li) + (Q_spleen - L_spleen) + 
+      (Q_pancreas - L_pancreas) + (Q_liver - L_liver))*C_v_liver -
+      
+       J_liver*C_v_liver*V_v_liver)#/V_v_liver
+
+
+    # C_v_lungs ========================================================
+      #' Unique compartment
+    dC_v_lungs = ((Q_lungs + L_lungs)*C_whole_blood -
+                    Q_lungs*C_v_lungs -
+                    J_lungs*C_v_lungs*V_v_lungs -
+                    E_lungs*C_v_lungs*V_v_lungs)#/V_v_lungs
+
+
+    # C_v_adipose ========================================================
+    #' Typical tissue
+    dC_v_adipose =
+      (Q_adipose*C_v_lungs - (Q_adipose - L_adipose)*C_v_adipose -
+         J_adipose*C_v_adipose*V_v_adipose)#/V_v_adipose
+
+    # C_v_heart ========================================================
+    #' Typical tissue
+    dC_v_heart =
+      (Q_heart*C_v_lungs - (Q_heart - L_heart)*C_v_heart -
+         J_heart*C_v_heart*V_v_heart)#/V_v_heart
+
+
+    # C_v_kidney ========================================================
+      #' Kidney spleen and liver have retention
+    dC_v_kidney =
+      (Q_kidney*C_v_lungs - (Q_kidney - L_kidney)*C_v_kidney -
+         J_kidney*C_v_kidney*V_v_kidney)#/V_v_kidney
+
+    # C_v_brain ========================================================
+    #' Typical tissue
+    dC_v_brain =
+      (Q_brain*C_v_lungs - (Q_brain - L_brain)*C_v_brain -
+         J_brain*C_v_brain*V_v_brain)#/V_v_brain
+
+    # C_v_others ========================================================
+      #' Typical tissue
+    dC_v_others =
+      (Q_others*C_v_lungs - (Q_others - L_others)*C_v_others -
+         J_others*C_v_others*V_v_others)#/V_v_others
+
+    # C_v_skin ========================================================
+      #' Typical tissue
+    dC_v_skin =
+      (Q_skin*C_v_lungs - (Q_skin - L_skin)*C_v_skin -
+         J_skin*C_v_skin*V_v_skin)#/V_v_skin
+
+    # C_v_si ========================================================
+      #' Typical tissue
+    dC_v_si =
+      (Q_si*C_v_lungs - (Q_si - L_si)*C_v_si -
+         J_si*C_v_si*V_v_si)#/V_v_si
+
+
+    # C_v_li ========================================================
+      #' Typical tissue
+    dC_v_li =
+      (Q_li*C_v_lungs - (Q_li - L_li)*C_v_li -
+         J_li*C_v_li*V_v_li)#/V_v_li
+
+
+    # C_v_spleen ========================================================
+      #' Kidney spleen and liver have retention
+    dC_v_spleen =
+      (Q_spleen*C_v_lungs - (Q_spleen - L_spleen)*C_v_spleen -
+         J_spleen*C_v_spleen*V_v_spleen)#/V_v_spleen
+
+
+    # C_v_pancreas ========================================================
+      #' Typical tissue
+    dC_v_pancreas =
+      (Q_pancreas*C_v_lungs - (Q_pancreas - L_pancreas)*C_v_pancreas -
+         J_pancreas*C_v_pancreas*V_v_pancreas)#/V_v_pancreas
+
+
+    # C_v_muscle ========================================================
+      #' Typical tissue
+    dC_v_muscle =
+      (Q_muscle*C_v_lungs - (Q_muscle - L_muscle)*C_v_muscle -
+         J_muscle*C_v_muscle*V_v_muscle)#/V_v_muscle
+
+
+    # C_v_bone ========================================================
+      #' Typical tissue
+    dC_v_bone =
+      (Q_bone*C_v_lungs - (Q_bone - L_bone)*C_v_bone -
+         J_bone*C_v_bone*V_v_bone)#/V_v_bone
+
+
+    # C_TDLN ========================================================
+      #' Unique compartment
+    dC_TDLN = (L_bone*(F_bone/2)*C_ev_bone + L_muscle*(F_muscle/2)*C_ev_muscle + 
+                  F_tumor*L_tumor*C_ev_tumor - C_TDLN*L_TDLN)#/V_TDLN
+
+
+    # C_IGLN ========================================================
+      #' Unique compartment
+    dC_IGLN =(L_bone*(F_bone/2)*C_ev_bone + L_muscle*(F_muscle/2)*C_ev_muscle - 
+                 C_IGLN*L_IGLN)#/V_IGLN
+
+
+    # C_ev_tumor ========================================================
+      #' typical ev compartment
+    dC_ev_tumor =
+      (J_tumor*C_v_tumor*V_v_tumor - L_tumor*C_ev_tumor*F_tumor)#/V_ev_tumor
+
+
+    # C_ev_liver ========================================================
+      #' Unique compartment
+    dC_ev_liver =
+      (J_liver*C_v_liver*V_v_liver - L_liver*(C_ev_liver/R_liver)*F_liver)#/V_ev_liver
+
+
+    # C_ev_lungs ========================================================
+      #' Unique ev cmt
+    dC_ev_lungs = (J_lungs*C_v_lungs*V_v_lungs -
+                      L_lungs*C_ev_lungs*F_lungs)#/V_ev_lungs
+
+
+    # C_ev_adipose ========================================================
+      #' typical ev compartment
+    dC_ev_adipose =
+      (J_adipose*C_v_adipose*V_v_adipose - L_adipose*C_ev_adipose*F_adipose)#/V_ev_adipose
+
+
+    # C_ev_heart ========================================================
+      #' typical ev compartment
+    dC_ev_heart =
+      (J_heart*C_v_heart*V_v_heart - L_heart*C_ev_heart*F_heart)#/V_ev_heart
+
+
+    # C_ev_kidney ========================================================
+      #' typical ev compartment with retention
+    dC_ev_kidney =
+      (J_kidney*C_v_kidney*V_v_kidney - L_kidney*(C_ev_kidney/R_kidney)*F_kidney)#/V_ev_kidney
+
+
+    # C_ev_brain ========================================================
+      #' typical ev compartment
+    dC_ev_brain =
+      (J_brain*C_v_brain*V_v_brain - L_brain*C_ev_brain*F_brain)#/V_ev_brain
+
+
+    # C_ev_others ========================================================
+      #' typical ev compartment
+    dC_ev_others =
+      (J_others*C_v_others*V_v_others - L_others*C_ev_others*F_others)#/V_ev_others
+
+    # C_ev_skin ========================================================
+      #' typical ev compartment
+    dC_ev_skin =
+      (J_skin*C_v_skin*V_v_skin - L_skin*C_ev_skin*F_skin)#/V_ev_skin
+
+
+    # C_ev_si ========================================================
+      #' typical ev compartment
+    dC_ev_si =
+      (J_si*C_v_si*V_v_si - L_si*C_ev_si*F_si)#/V_ev_si
+
+
+    # C_ev_li ========================================================
+      #' typical ev compartment
+    dC_ev_li =
+      (J_li*C_v_li*V_v_li - L_li*C_ev_li*F_li)#/V_ev_li
+
+
+    # C_ev_spleen ========================================================
+      #' typical ev compartment with retention
+    dC_ev_spleen =
+      (J_spleen*C_v_spleen*V_v_spleen - L_spleen*(C_ev_spleen/R_spleen)*F_spleen)#/V_ev_spleen
+
+
+    # C_ev_pancreas ========================================================
+      #' typical ev compartment
+    dC_ev_pancreas =
+      (J_pancreas*C_v_pancreas*V_v_pancreas - L_pancreas*C_ev_pancreas*F_pancreas)#/V_ev_pancreas
+
+
+    # C_ev_muscle ========================================================
+      #' typical ev compartment
+    dC_ev_muscle =
+      (J_muscle*C_v_muscle*V_v_muscle - L_muscle*C_ev_muscle*F_muscle)#/V_ev_muscle
+
+
+    # C_ev_bone ========================================================
+      #' typical ev compartment
+    dC_ev_bone =
+      (J_bone*C_v_bone*V_v_bone - L_bone*C_ev_bone*F_bone)#/V_ev_bone
+
+
+    # elimination ========================================================
+      #' Basically an AUC type parameter
+    delimination = E_lungs*C_v_lungs - 1E3*elimination
+
+    # return      ========================================================
+    return(list(c(dC_lymph_node=dC_lymph_node, 
+                  dC_whole_blood=dC_whole_blood, 
+                  dC_v_tumor=dC_v_tumor, 
+                  dC_v_liver=dC_v_liver, 
+                  dC_v_lungs=dC_v_lungs, 
+                  dC_v_adipose=dC_v_adipose, 
+                  dC_v_heart=dC_v_heart, 
+                  dC_v_kidney=dC_v_kidney, 
+                  dC_v_brain=dC_v_brain, 
+                  dC_v_others=dC_v_others, 
+                  dC_v_skin=dC_v_skin, 
+                  dC_v_si=dC_v_si, 
+                  dC_v_li=dC_v_li, 
+                  dC_v_spleen=dC_v_spleen, 
+                  dC_v_pancreas=dC_v_pancreas, 
+                  dC_v_muscle=dC_v_muscle, 
+                  dC_v_bone=dC_v_bone, 
+                  dC_TDLN=dC_TDLN, 
+                  dC_IGLN=dC_IGLN, 
+                  dC_ev_tumor=dC_ev_tumor, 
+                  dC_ev_liver=dC_ev_liver, 
+                  dC_ev_lungs=dC_ev_lungs, 
+                  dC_ev_adipose=dC_ev_adipose, 
+                  dC_ev_heart=dC_ev_heart, 
+                  dC_ev_kidney=dC_ev_kidney, 
+                  dC_ev_brain=dC_ev_brain, 
+                  dC_ev_others=dC_ev_others, 
+                  dC_ev_skin=dC_ev_skin, 
+                  dC_ev_si=dC_ev_si, 
+                  dC_ev_li=dC_ev_li, 
+                  dC_ev_spleen=dC_ev_spleen, 
+                  dC_ev_pancreas=dC_ev_pancreas, 
+                  dC_ev_muscle=dC_ev_muscle, 
+                  dC_ev_bone=dC_ev_bone, 
+                  delimination=delimination)))
+  })
+}
+
+#an example of how to simulate and plot
+o = ode(y = state_mod_lymph, times = times, func = mod, parms = parameters_mod_lymph, events = events, method = "lsoda")
+plot(o, col='red')
+
+

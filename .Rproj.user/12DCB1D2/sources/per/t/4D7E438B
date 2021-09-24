@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1584035191409.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "4198950705",
+    "id" : "4D7E438B",
+    "lastKnownWriteTime" : 1632510761,
+    "last_content_update" : 1632510761028,
+    "path" : "C:/Users/Benjamin.000/Dropbox/portfolio/cartCellTherapy/ini.R",
+    "project_path" : "ini.R",
+    "properties" : {
+        "cursorPosition" : "0,75",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
