@@ -9,11 +9,11 @@
     "id" : "F4F55431",
     "lastKnownWriteTime" : 1632510739,
     "last_content_update" : 1632510739875,
-    "path" : "C:/Users/Benjamin.000/Dropbox/portfolio/cartCellTherapy/parameters.R",
+    "path" : "~/GitHub/cart-cell-model/parameters.R",
     "project_path" : "parameters.R",
     "properties" : {
-        "cursorPosition" : "285,0",
-        "scrollLine" : "268"
+        "cursorPosition" : "153,0",
+        "scrollLine" : "140"
     },
     "read_only" : false,
     "read_only_alternatives" : [
